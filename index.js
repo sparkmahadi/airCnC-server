@@ -23,6 +23,7 @@ async function run() {
   try {
     const homesCollection = client.db('aircnc-db').collection('homes')
     const usersCollection = client.db('aircnc-db').collection('users')
+    const bookingsCollection = client.db('aircnc-db').collection('bookings')
 
     // Save user email & generate JWT
     app.put('/user/:email', async (req, res) => {
@@ -41,6 +42,55 @@ async function run() {
       })
       console.log(token)
       res.send({ result, token })
+    })
+
+    // Get a single user by email
+    app.get('/user/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: email }
+
+      const user = await usersCollection.findOne(query)
+      console.log(user.role)
+      res.send(user)
+    })
+
+    // Get all users
+    app.get('/users', async (req, res) => {
+      const users = await usersCollection.find().toArray()
+      console.log(users)
+      res.send(users)
+    })
+
+    // Save a booking
+    app.post('/bookings', async (req, res) => {
+      const bookingData = req.body
+      const result = await bookingsCollection.insertOne(bookingData)
+      console.log(result)
+      res.send(result)
+    })
+
+    // Get All Bookings
+    app.get('/bookings', async (req, res) => {
+      let query = {}
+      const email = req.query.email
+      if (email) {
+        query = {
+          guestEmail: email,
+        }
+      }
+
+      const booking = await bookingsCollection.find(query).toArray()
+      console.log(booking)
+      res.send(booking)
+    })
+
+    // Add a home
+    // Save a booking
+    app.post('/homes', async (req, res) => {
+      const homes = req.body
+      const result = await homesCollection.insertOne(homes)
+      console.log(result)
+      res.send(result)
     })
 
     console.log('Database Connected...')
